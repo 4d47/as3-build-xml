@@ -1,0 +1,167 @@
+<project default="all" basedir="..">
+    <dirname property="build" file="${ant.file}" />
+
+    <!-- user overrides of default properties -->
+    <property file="local.build.properties" />
+    <property file="build.properties" />
+
+    <!-- default properties and locations -->
+    <available file="build-config.xml" property="build-config" value="${basedir}/build-config.xml" />
+    <property name="debug" value="false" />
+    <property name="src" location="src" />
+    <property name="doc" location="doc" />
+    <property name="bin" location="bin" />
+    <property name="libs" location="libs" />
+    <property name="test" location="test" />
+    <property name="test.src" location="${test}/TestRunner.mxml" />
+    <property name="test.swf" location="${test}/TestRunner.swf" />
+    <property name="build" location="build" />
+    <property name="build.lib" location="${build}/lib" />
+    <property name="build-config" location="${build}/build-config.xml" />
+    <property name="test-reports" location="test-reports" />
+
+    <property environment="env." />
+    <property name="FLEX_HOME" value="${env.FLEX_HOME}" />
+
+    <!-- test FLEX_HOME property to fail with a nicer error message. -->
+    <available file="${FLEX_HOME}" property="FLEX_HOME.available" />
+    <fail message="Please define the FLEX_HOME environement variable or build property." unless="${FLEX_HOME.available}" />
+
+    <condition property="test.headless">
+        <!-- defaults to running flexunit headless on Linux -->
+        <and> <os family="unix" /> <not> <os family="mac" /> </not> </and>
+    </condition>
+
+    <target name="all" depends="clean, test, doc, build" />
+
+    <target name="clean">
+        <delete dir="${doc}" />
+        <delete dir="${test-reports}"/>
+        <delete file="${test.swf}" />
+        <delete>
+            <fileset dir="${bin}" includes="*.swf" />
+        </delete>
+    </target>
+
+    <target name="test">
+        <delete dir="${test-reports}" />
+        <mkdir dir="${test-reports}" />
+        <!-- compile test runner -->
+        <mxmlc file="${test.src}" output="${test.swf}">
+            <verbose-stacktraces>true</verbose-stacktraces>
+            <source-path path-element="${test}" />
+            <source-path path-element="${src}" />
+            <compiler.library-path dir="${build}" append="true">
+                <include name="lib" />
+            </compiler.library-path>
+            <compiler.library-path dir="${basedir}" append="true">
+                <include name="libs" />
+            </compiler.library-path>
+            <load-config filename="${build-config}" append="true" />
+        </mxmlc>
+        <!-- run unit tests -->
+        <flexunit headless="${test.headless}" swf="${test}/Test.swf" toDir="${test-reports}" verbose="true" haltonfailure="true" />
+        <!-- generate test-reports -->
+        <flexpmd sourceDirectory="src" outputDirectory="${test-reports}" />
+        <metrics sourcedirectory="src" outputfile="${test-reports}/javancss.xml" />
+        <cpd minimumTokenCount="50" outputFile="${test-reports}/cpd.xml">
+            <fileset dir="${src}">
+                <include name="**/*.as"/>
+                <include name="**/*.mxml"/>
+            </fileset>
+        </cpd>
+    </target>
+
+    <target name="doc">
+        <asdoc failonerror="true" output="${doc}">
+            <doc-sources path-element="${src}" />
+            <compiler.library-path dir="${basedir}" append="true">
+                <include name="libs" />
+            </compiler.library-path>
+            <load-config filename="${build-config}" append="true" />
+        </asdoc>
+    </target>
+
+    <target name="build">
+        <mkdir dir="${bin}" />
+        <foreach target="build-swf" param="file">
+            <path>
+                <fileset dir="${src}">
+                    <include name="*.as" />
+                    <include name="*.mxml" />
+                </fileset>
+            </path>
+        </foreach>
+    </target>
+
+    <target name="build-swf">
+        <basename property="name" file="${file}" />
+        <propertyregex property="out.name" input="${name}" regexp="^(.*)\..*$" replace="${bin}/\1.swf" />
+        <mxmlc file="${file}" output="${out.name}" debug="${debug}">
+            <source-path path-element="${src}" />
+            <compiler.library-path dir="${basedir}" append="true">
+                <include name="libs" />
+            </compiler.library-path>
+            <load-config filename="${build-config}" append="true" />
+        </mxmlc>
+    </target>
+
+    <target name="deploy" depends="build">
+        <fail message="Please define the deploy property." unless="deploy" />
+        <exec executable="rsync" failonerror="true">
+            <arg line="--recursive --delete ${bin}/ ${deploy}"/>
+        </exec>
+    </target>
+
+
+    <!--
+     Boring Stuff Above
+    -->
+
+    <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />
+    <taskdef resource="flexUnitTasks.tasks" classpath="${build.lib}/flexUnitTasks-4.1.0-8.jar" />
+    <taskdef name="flexpmd" classname="com.adobe.ac.pmd.ant.FlexPmdAntTask" classpath="${build.lib}/flex-pmd-ant-task-1.2.jar">
+        <classpath>
+            <pathelement location="${build.lib}/flex-pmd-ruleset-api-1.2.jar"/>
+            <pathelement location="${build.lib}/flex-pmd-ruleset-1.2.jar"/>
+            <pathelement location="${build.lib}/flex-pmd-core-1.2.jar"/>
+            <pathelement location="${build.lib}/as3-plugin-utils-1.2.jar"/>
+            <pathelement location="${build.lib}/as3-parser-1.2.jar"/>
+            <pathelement location="${build.lib}/pmd-4.2.5.jar"/>
+            <pathelement location="${build.lib}/commons-lang-2.4.jar"/>
+            <pathelement location="${build.lib}/flex-pmd-files-1.2.jar"/>
+            <pathelement location="${build.lib}/as3-parser-api-1.2.jar"/>
+            <pathelement location="${build.lib}/plexus-utils-1.0.2.jar"/>
+        </classpath>
+    </taskdef>
+    <taskdef name="metrics" classname="com.adobe.ac.pmd.metrics.ant.FlexMetricsAntTask"
+        classpath="${build.lib}/flex-pmd-metrics-ant-task-1.2.jar">
+        <classpath>
+            <pathelement location="${build.lib}/flex-pmd-files-1.2.jar" />
+            <pathelement location="${build.lib}/flex-pmd-metrics-1.2.jar" />
+            <pathelement location="${build.lib}/as3-plugin-utils-1.2.jar" />
+            <pathelement location="${build.lib}/as3-parser-1.2.jar" />
+            <pathelement location="${build.lib}/as3-parser-api-1.2.jar" />
+            <pathelement location="${build.lib}/commons-lang-2.4.jar" />
+            <pathelement location="${build.lib}/flex-pmd-ruleset-api-1.2.jar" />
+            <pathelement location="${build.lib}/pmd-4.2.5.jar" />
+            <pathelement location="${build.lib}/dom4j-1.6.1.jar"/>
+        </classpath>
+    </taskdef> 
+    <taskdef name="cpd" classname="com.adobe.ac.cpd.ant.FlexCpdAntTask"
+        classpath="${build.lib}/flex-pmd-cpd-ant-task-1.2.jar">
+        <classpath>
+            <pathelement location="${build.lib}/flex-pmd-files-1.2.jar" />
+            <pathelement location="${build.lib}/flex-pmd-cpd-1.2.jar" />
+            <pathelement location="${build.lib}/as3-plugin-utils-1.2.jar" />
+            <pathelement location="${build.lib}/as3-parser-1.2.jar" />
+            <pathelement location="${build.lib}/as3-parser-api-1.2.jar" />
+            <pathelement location="${build.lib}/pmd-4.2.5.jar" />
+        </classpath>
+    </taskdef>
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="${build.lib}/ant-contrib-0.6.jar"/>
+        </classpath>
+    </taskdef>
+</project>
