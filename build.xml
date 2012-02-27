@@ -88,8 +88,8 @@
 
     <target name="build-swf">
         <basename property="name" file="${file}" />
-        <propertyregex property="out.name" input="${name}" regexp="^(.*)\..*$" replace="${bin}/\1.swf" />
-        <mxmlc file="${file}" output="${out.name}" debug="${debug}">
+        <propertyregex property="out.name" input="${name}" regexp="^(.*)\..*$" replace="\1.swf" />
+        <mxmlc file="${file}" output="${bin}/${out.name}" debug="${debug}">
             <source-path path-element="${src}" />
             <compiler.library-path dir="${basedir}" append="true">
                 <include name="libs" />
