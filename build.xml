@@ -60,7 +60,7 @@
             <load-config filename="${build-config}" append="true" />
         </mxmlc>
         <!-- run unit tests -->
-        <flexunit headless="${test.headless}" swf="${test}/Test.swf" toDir="${test-reports}" verbose="true" haltonfailure="true" />
+        <flexunit headless="${test.headless}" swf="${test.swf}" toDir="${test-reports}" verbose="true" haltonfailure="true" />
         <!-- generate test-reports -->
         <flexpmd sourceDirectory="src" outputDirectory="${test-reports}" />
         <metrics sourcedirectory="src" outputfile="${test-reports}/javancss.xml" />
