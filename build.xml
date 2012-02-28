@@ -7,15 +7,20 @@
 
     <!-- default properties and locations -->
     <available file="build-config.xml" property="build-config" value="${basedir}/build-config.xml" />
+    <available file="src" property="src.available" />
+    <available file="src" property="src" value="${basedir}/src" />
+    <available file="libs" property="libs" value="${basedir}/libs" />
+
     <property name="debug" value="false" />
-    <property name="src" location="src" />
+    <property name="src" location="${basedir}" />
     <property name="doc" location="doc" />
     <property name="bin" location="bin" />
-    <property name="libs" location="libs" />
+    <property name="libs" location="${basedir}" />
     <property name="test" location="test" />
     <property name="build.lib" location="${build}/lib" />
     <property name="build-config" location="${build}/build-config.xml" />
     <property name="test-reports" location="test-reports" />
+    <property name="deploy.args" value="--recursive --delete" />
 
     <property environment="env." />
     <property name="FLEX_HOME" value="${env.FLEX_HOME}" />
@@ -24,8 +29,8 @@
     <available file="${FLEX_HOME}" property="FLEX_HOME.available" />
     <fail message="Please define the FLEX_HOME environement variable or build property." unless="${FLEX_HOME.available}" />
 
+    <!-- defaults to running flexunit headless on Linux -->
     <condition property="test.headless">
-        <!-- defaults to running flexunit headless on Linux -->
         <and> <os family="unix" /> <not> <os family="mac" /> </not> </and>
     </condition>
 
@@ -35,7 +40,7 @@
         <delete dir="${doc}" />
         <delete dir="${test-reports}"/>
         <delete>
-            <fileset dir="${bin}" includes="*.swf" />
+            <fileset dir="${bin}" includes="*.swf" erroronmissingdir="false" />
         </delete>
     </target>
 
@@ -53,9 +58,12 @@
         </flexunit>
         <delete file="TestRunner.mxml" />
         <delete file="TestRunner.swf" />
-        <!-- generate test-reports -->
-        <flexpmd sourceDirectory="src" outputDirectory="${test-reports}" />
-        <metrics sourcedirectory="src" outputfile="${test-reports}/javancss.xml" />
+        <antcall target="audit" />
+    </target>
+
+    <target name="audit" if="src.available">
+        <flexpmd sourceDirectory="${src}" outputDirectory="${test-reports}" />
+        <metrics sourcedirectory="${src}" outputfile="${test-reports}/javancss.xml" />
         <cpd minimumTokenCount="50" outputFile="${test-reports}/cpd.xml">
             <fileset dir="${src}">
                 <include name="**/*.as"/>
@@ -64,17 +72,17 @@
         </cpd>
     </target>
 
-    <target name="doc">
+    <target name="doc" if="src.available">
         <asdoc failonerror="true" output="${doc}">
             <doc-sources path-element="${src}" />
-            <compiler.library-path dir="${basedir}" append="true">
-                <include name="libs" />
+            <compiler.library-path dir="${libs}" append="true">
+                <include name="**/*.swc" />
             </compiler.library-path>
             <load-config filename="${build-config}" append="true" />
         </asdoc>
     </target>
 
-    <target name="build">
+    <target name="build" if="src.available">
         <mkdir dir="${bin}" />
         <foreach target="build-swf" param="file">
             <path>
@@ -91,8 +99,8 @@
         <propertyregex property="out.name" input="${name}" regexp="^(.*)\..*$" replace="\1.swf" />
         <mxmlc file="${file}" output="${bin}/${out.name}" debug="${debug}">
             <source-path path-element="${src}" />
-            <compiler.library-path dir="${basedir}" append="true">
-                <include name="libs" />
+            <compiler.library-path dir="${libs}" append="true">
+                <include name="**/*.swc" />
             </compiler.library-path>
             <load-config filename="${build-config}" append="true" />
         </mxmlc>
@@ -101,7 +109,7 @@
     <target name="deploy" depends="build">
         <fail message="Please define the deploy property." unless="deploy" />
         <exec executable="rsync" failonerror="true">
-            <arg line="--recursive --delete ${bin}/ ${deploy}"/>
+            <arg line="${deploy.args} ${bin}/ ${deploy}"/>
         </exec>
     </target>
 
