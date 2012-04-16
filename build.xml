@@ -108,9 +108,9 @@
 
     <target name="deploy" depends="build">
         <fail message="Please define the deploy property." unless="deploy" />
-        <exec executable="rsync" failonerror="true">
-            <arg line="${deploy.args} ${bin}/ ${deploy}"/>
-        </exec>
+        <scp todir="${deploy}" sftp="true" trust="true">
+            <fileset dir="${bin}" />
+        </scp>
     </target>
 
 
