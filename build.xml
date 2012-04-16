@@ -7,7 +7,6 @@
 
     <!-- default properties and locations -->
     <available file="build-config.xml" property="build-config" value="${basedir}/build-config.xml" />
-    <available file="src" property="src.available" />
     <available file="src" property="src" value="${basedir}/src" />
     <available file="libs" property="libs" value="${basedir}/libs" />
 
@@ -20,12 +19,11 @@
     <property name="build.lib" location="${build}/lib" />
     <property name="build-config" location="${build}/build-config.xml" />
     <property name="test-reports" location="test-reports" />
-    <property name="deploy.args" value="--recursive --delete" />
 
     <property environment="env." />
     <property name="FLEX_HOME" value="${env.FLEX_HOME}" />
 
-    <!-- test FLEX_HOME property to fail with a nicer error message. -->
+    <!-- test FLEX_HOME property to fail with a nicer error message -->
     <available file="${FLEX_HOME}" property="FLEX_HOME.available" />
     <fail message="Please define the FLEX_HOME environement variable or build property." unless="${FLEX_HOME.available}" />
 
@@ -34,20 +32,32 @@
         <and> <os family="unix" /> <not> <os family="mac" /> </not> </and>
     </condition>
 
-    <target name="all" depends="clean, test, doc, build" />
+    <!-- list of main ActionScript files -->
+    <path id="main.path">
+        <fileset dir="${src}">
+            <include name="*.as" />
+            <include name="*.mxml" />
+        </fileset>
+    </path>
+
+    <pathconvert refid="main.path" property="main.available" setonempty="false" />
+
+
+    <target name="all" depends="clean, test, doc, build, build-swc" />
 
     <target name="clean">
         <delete dir="${doc}" />
         <delete dir="${test-reports}"/>
         <delete>
             <fileset dir="${bin}" includes="*.swf" erroronmissingdir="false" />
+            <fileset dir="${bin}" includes="*.swc" erroronmissingdir="false" />
         </delete>
     </target>
 
     <target name="test">
         <delete dir="${test-reports}" />
         <mkdir dir="${test-reports}" />
-        <flexunit debug="true" headless="${test.headless}" toDir="${test-reports}" verbose="true" haltonfailure="true">
+        <flexunit debug="true" headless="${test.headless}" toDir="${test-reports}" verbose="true" failureproperty="test.failed">
             <source dir="${src}" />
             <testSource dir="${test}">
                 <include name="**/*Test.as" />
@@ -58,10 +68,17 @@
         </flexunit>
         <delete file="TestRunner.mxml" />
         <delete file="TestRunner.swf" />
+        <junitreport todir="${test-reports}">
+            <fileset dir="${test-reports}">
+                <include name="TEST-*.xml" />
+            </fileset>
+            <report format="frames" todir="${test-reports}/html" />
+        </junitreport>
+        <fail message="Test Failed: see '${test-reports}/html/index.html' for details." if="test.failed" />
         <antcall target="audit" />
     </target>
 
-    <target name="audit" if="src.available">
+    <target name="audit">
         <flexpmd sourceDirectory="${src}" outputDirectory="${test-reports}" />
         <metrics sourcedirectory="${src}" outputfile="${test-reports}/javancss.xml" />
         <cpd minimumTokenCount="50" outputFile="${test-reports}/cpd.xml">
@@ -72,7 +89,7 @@
         </cpd>
     </target>
 
-    <target name="doc" if="src.available">
+    <target name="doc">
         <asdoc failonerror="true" output="${doc}">
             <doc-sources path-element="${src}" />
             <compiler.library-path dir="${libs}" append="true">
@@ -82,15 +99,10 @@
         </asdoc>
     </target>
 
-    <target name="build" if="src.available">
+    <target name="build" if="main.available">
         <mkdir dir="${bin}" />
         <foreach target="build-swf" param="file">
-            <path>
-                <fileset dir="${src}">
-                    <include name="*.as" />
-                    <include name="*.mxml" />
-                </fileset>
-            </path>
+            <path refid="main.path" />
         </foreach>
     </target>
 
@@ -104,6 +116,17 @@
             </compiler.library-path>
             <load-config filename="${build-config}" append="true" />
         </mxmlc>
+    </target>
+
+    <target name="build-swc" unless="main.available">
+        <compc output="${bin}/${project.name}-${project.version}.swc" debug="${debug}">
+            <include-sources dir="${src}" includes="*"/>
+            <source-path path-element="${src}" />
+            <compiler.library-path dir="${libs}/" append="true">
+                <include name="${**/*.swc}" />
+            </compiler.library-path>
+            <load-config filename="${build-config}" append="true" />
+        </compc>
     </target>
 
     <target name="deploy" depends="build">
