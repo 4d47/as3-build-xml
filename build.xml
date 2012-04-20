@@ -119,14 +119,12 @@
     </target>
 
     <target name="build-swc" unless="main.available">
-        <compc output="${bin}/${project.name}-${project.version}.swc" debug="${debug}">
-            <include-sources dir="${src}" includes="*"/>
-            <source-path path-element="${src}" />
-            <compiler.library-path dir="${libs}/" append="true">
-                <include name="${**/*.swc}" />
-            </compiler.library-path>
-            <load-config filename="${build-config}" append="true" />
-        </compc>
+        <java jar="${FLEX_HOME}/lib/compc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
+            <arg value="-output=${bin}/${project.name}-${project.version}.swc" />
+            <arg value="-include-sources=${src}" />
+            <arg value="-library-path+=${libs}" />
+            <arg value="-load-config+=${build-config}" />
+        </java>
     </target>
 
     <target name="deploy" depends="build">
