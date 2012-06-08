@@ -109,7 +109,7 @@
     <target name="build-swf">
         <basename property="name" file="${file}" />
         <propertyregex property="out.name" input="${name}" regexp="^(.*)\..*$" replace="\1.swf" />
-        <mxmlc file="${file}" output="${bin}/${out.name}" debug="${debug}">
+        <mxmlc file="${file}" output="${bin}/${out.name}" debug="${debug}" fork="true" maxmemory="512m">
             <source-path path-element="${src}" />
             <compiler.library-path dir="${libs}" append="true">
                 <include name="**/*.swc" />
