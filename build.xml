@@ -19,6 +19,7 @@
     <property name="build.lib" location="${build}/lib" />
     <property name="build-config" location="${build}/build-config.xml" />
     <property name="test-reports" location="test-reports" />
+    <property name="mxmlc.maxmemory" value="512m" />
 
     <property environment="env." />
     <property name="FLEX_HOME" value="${env.FLEX_HOME}" />
@@ -109,7 +110,7 @@
     <target name="build-swf">
         <basename property="name" file="${file}" />
         <propertyregex property="out.name" input="${name}" regexp="^(.*)\..*$" replace="\1.swf" />
-        <mxmlc file="${file}" output="${bin}/${out.name}" debug="${debug}" fork="true" maxmemory="512m">
+        <mxmlc file="${file}" output="${bin}/${out.name}" debug="${debug}" fork="true" maxmemory="${mxmlc.maxmemory}">
             <source-path path-element="${src}" />
             <compiler.library-path dir="${libs}" append="true">
                 <include name="**/*.swc" />
