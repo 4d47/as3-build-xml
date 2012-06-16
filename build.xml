@@ -43,8 +43,13 @@
 
     <pathconvert refid="main.path" property="main.available" setonempty="false" />
 
+    <!--
+     Build targets
+    -->
 
-    <target name="all" depends="clean, test, doc, build, build-swc" />
+    <target name="all" depends="clean, test, audit, doc, build" />
+
+    <target name="build" depends="build-init, build-swfs, build-swc" />
 
     <target name="clean">
         <delete dir="${doc}" />
@@ -52,6 +57,9 @@
         <delete>
             <fileset dir="${bin}" includes="*.swf" erroronmissingdir="false" />
             <fileset dir="${bin}" includes="*.swc" erroronmissingdir="false" />
+        </delete>
+        <delete includeemptydirs="true">
+            <fileset dir="${bin}" excludes="**/*" erroronmissingdir="false" />
         </delete>
     </target>
 
@@ -76,7 +84,6 @@
             <report format="frames" todir="${test-reports}/html" />
         </junitreport>
         <fail message="Test Failed: see '${test-reports}/html/index.html' for details." if="test.failed" />
-        <antcall target="audit" />
     </target>
 
     <target name="audit">
@@ -100,8 +107,11 @@
         </asdoc>
     </target>
 
-    <target name="build" if="main.available">
+    <target name="build-init">
         <mkdir dir="${bin}" />
+    </target>
+
+    <target name="build-swfs" if="main.available">
         <foreach target="build-swf" param="file">
             <path refid="main.path" />
         </foreach>
