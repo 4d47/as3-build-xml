@@ -130,9 +130,13 @@
 
     <target name="deploy" depends="build">
         <fail message="Please define the deploy property." unless="deploy" />
-        <scp todir="${deploy}" sftp="true" trust="true">
-            <fileset dir="${bin}" />
-        </scp>
+        <for list="${deploy}" param="host" trim="true">
+            <sequential>
+                <scp todir="@{host}" sftp="true" trust="true">
+                    <fileset dir="${bin}" />
+                </scp>
+            </sequential>
+        </for>
     </target>
 
 
