@@ -1,5 +1,5 @@
 <project name="build" default="all" basedir="..">
-     <dirname property="build" file="${ant.file.build}" />
+    <dirname property="build" file="${ant.file.build}" />
 
     <!-- user overrides of default properties -->
     <property file="local.build.properties" />
@@ -132,7 +132,6 @@
             <load-config filename="${build-config}" append="true" />
             <define name="CONFIG::debug" value="${debug}" />
             <define name="CONFIG::release" value="${release}" />
-            <define name="CONFIG::version" value="'${project.version}'" />
         </mxmlc>
     </target>
 
@@ -144,7 +143,6 @@
             <arg value="-load-config+=${build-config}" />
             <arg value="-define=CONFIG::debug,&quot;${debug}&quot;" />
             <arg value="-define=CONFIG::release,&quot;${release}&quot;" />
-            <arg value="-define=CONFIG::version,&quot;'${project.version}'&quot;" />
         </java>
     </target>
 
