@@ -11,6 +11,10 @@
     <available file="libs" property="libs" value="${basedir}/libs" />
 
     <property name="debug" value="false" />
+    <condition property="release" value="true" else="false">
+        <isfalse value="${debug}" />
+    </condition>
+
     <property name="src" location="${basedir}" />
     <property name="doc" location="doc" />
     <property name="bin" location="bin" />
@@ -126,6 +130,9 @@
                 <include name="**/*.swc" />
             </compiler.library-path>
             <load-config filename="${build-config}" append="true" />
+            <define name="CONFIG::debug" value="${debug}" />
+            <define name="CONFIG::release" value="${release}" />
+            <define name="CONFIG::version" value="'${project.version}'" />
         </mxmlc>
     </target>
 
@@ -135,6 +142,9 @@
             <arg value="-include-sources=${src}" />
             <arg value="-library-path+=${libs}" />
             <arg value="-load-config+=${build-config}" />
+            <arg value="-define=CONFIG::debug,&quot;${debug}&quot;" />
+            <arg value="-define=CONFIG::release,&quot;${release}&quot;" />
+            <arg value="-define=CONFIG::version,&quot;'${project.version}'&quot;" />
         </java>
     </target>
 
