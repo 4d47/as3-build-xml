@@ -4,13 +4,13 @@ as3-build-xml
 
 Generic Flex Ant build script for our AS3 friends over here.
 
-It builds `src/*.{as,mxml}` using the SWCs in `libs/` and put the
+It compiles `src/*.{as,mxml}` using the SWCs in `libs/` and put the
 generated SWF files in the `bin/` folder. If no src files are found
-at the top-level, it assumes it is an archive and builds a SWC.
+at the top-level, it assumes it is an archive and compiles a SWC.
 
 The ASDoc is generated in `doc/`. The FlexUnit classes are in `test/` and
 Mockolate is available, results including code audit (with FlexPMD, FlexCPD
-and FlexMetrics) is written in `test-reports/`. You can use the deploy task
+and FlexMetrics) are written to `test-reports/`. You can use the deploy task,
 but make sure ant-jsch.jar and jsch.jar (available in `lib`) are in your
 Ant library path.
 

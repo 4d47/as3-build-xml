@@ -51,9 +51,9 @@
      Build targets
     -->
 
-    <target name="all" depends="clean, test, audit, doc, build" />
+    <target name="all" depends="clean, test, audit, doc, compile" />
 
-    <target name="build" depends="build-init, build-swfs, build-swc" />
+    <target name="compile" depends="compile-init, compile-swfs, compile-swc" />
 
     <target name="clean">
         <delete dir="${doc}" />
@@ -111,17 +111,17 @@
         </asdoc>
     </target>
 
-    <target name="build-init">
+    <target name="compile-init">
         <mkdir dir="${bin}" />
     </target>
 
-    <target name="build-swfs" if="main.available">
-        <foreach target="build-swf" param="file">
+    <target name="compile-swfs" if="main.available">
+        <foreach target="compile-swf" param="file">
             <path refid="main.path" />
         </foreach>
     </target>
 
-    <target name="build-swf">
+    <target name="compile-swf">
         <basename property="name" file="${file}" />
         <propertyregex property="out.name" input="${name}" regexp="^(.*)\..*$" replace="\1.swf" />
         <mxmlc file="${file}" output="${bin}/${out.name}" debug="${debug}" fork="true" maxmemory="${mxmlc.maxmemory}">
@@ -135,7 +135,7 @@
         </mxmlc>
     </target>
 
-    <target name="build-swc" unless="main.available">
+    <target name="compile-swc" unless="main.available">
         <java jar="${FLEX_HOME}/lib/compc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
             <arg value="-output=${bin}/${project.name}-${project.version}.swc" />
             <arg value="-include-sources=${src}" />
@@ -146,7 +146,7 @@
         </java>
     </target>
 
-    <target name="deploy" depends="build">
+    <target name="deploy" depends="compile">
         <fail message="Please define the deploy property." unless="deploy" />
         <scp todir="${deploy}" sftp="true" trust="true">
             <fileset dir="${bin}" />
