@@ -21,4 +21,14 @@ and `build-config.xml` in your project root directory.
 
     git submodule add https://github.com/4d47/as3-build-xml.git build
 
+It can can be extended with your own targets using Ant import/include tasks.
+Eg. create a build.xml in the root of the project (next to build folder):
+
+    <project default="compile">
+        <import file="build/build.xml" />
+        
+        <target name="hello">
+            <echo>Hello</echo>
+        </target>
+    </project>
 
