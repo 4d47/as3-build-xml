@@ -12,7 +12,7 @@
 
     <property name="debug" value="false" />
     <property name="src" location="${basedir}" />
-    <property name="doc" location="doc" />
+    <property name="asdoc" location="asdoc" />
     <property name="bin" location="bin" />
     <property name="libs" location="${basedir}" />
     <property name="test" location="test" />
@@ -47,12 +47,12 @@
      Build targets
     -->
 
-    <target name="all" depends="clean, test, audit, doc, compile" />
+    <target name="all" depends="clean, test, audit, asdoc, compile" />
 
     <target name="compile" depends="compile-init, compile-swfs, compile-swc" />
 
     <target name="clean">
-        <delete dir="${doc}" />
+        <delete dir="${asdoc}" />
         <delete dir="${test-reports}"/>
         <delete>
             <fileset dir="${bin}" includes="*.swf" erroronmissingdir="false" />
@@ -97,8 +97,8 @@
         </cpd>
     </target>
 
-    <target name="doc">
-        <asdoc failonerror="true" output="${doc}">
+    <target name="asdoc">
+        <asdoc failonerror="true" output="${asdoc}">
             <doc-sources path-element="${src}" />
             <compiler.library-path dir="${libs}" append="true">
                 <include name="**/*.swc" />
@@ -138,9 +138,9 @@
         </java>
     </target>
 
-    <target name="deploy" depends="compile">
-        <fail message="Please define the deploy property." unless="deploy" />
-        <scp todir="${deploy}" sftp="true" trust="true">
+    <target name="publish" depends="compile">
+        <fail message="Please define the publish property." unless="publish" />
+        <scp todir="${publish}" sftp="true" trust="true">
             <fileset dir="${bin}" />
         </scp>
     </target>
