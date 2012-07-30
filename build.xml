@@ -20,6 +20,8 @@
     <property name="build-config" location="${build}/build-config.xml" />
     <property name="test-reports" location="test-reports" />
     <property name="mxmlc.maxmemory" value="512m" />
+    <property name="serve.port" value="8080" />
+    <property name="serve.root" value="${bin}" />
 
     <property environment="env." />
     <property name="FLEX_HOME" value="${env.FLEX_HOME}" />
@@ -143,6 +145,22 @@
         <scp todir="${publish}" sftp="true" trust="true">
             <fileset dir="${bin}" />
         </scp>
+    </target>
+
+    <target name="serve">
+        <condition property="os-ext" value=".exe">
+            <os family="windows" />
+        </condition>
+        <condition property="os-ext" value=".mac">
+            <and> <os family="unix" /> <os family="mac" /> </and>
+        </condition>
+        <condition property="os-ext" value=".linux">
+            <os family="unix" />
+        </condition>
+        <echo>Serving ${serve.root} on http://localhost:${serve.port} ...</echo>
+        <exec executable="${build.lib}/mongoose-3.1${os-ext}">
+            <arg line="-r ${serve.root} -p ${serve.port}" />
+        </exec>
     </target>
 
 
