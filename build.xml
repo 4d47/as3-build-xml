@@ -100,7 +100,7 @@
     </target>
 
     <target name="asdoc">
-        <asdoc failonerror="true" output="${asdoc}">
+        <asdoc failonerror="true" output="${asdoc}" keep-xml="true" skip-xsl="true">
             <doc-sources path-element="${src}" />
             <compiler.library-path dir="${libs}" append="true">
                 <include name="**/*.swc" />
@@ -131,13 +131,21 @@
         </mxmlc>
     </target>
 
-    <target name="compile-swc" unless="main.available">
+    <target name="compile-swc" depends="asdoc" unless="main.available">
+        <property name="out.name" value="${bin}/${project.name}-${project.version}.swc" />
         <java jar="${FLEX_HOME}/lib/compc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
-            <arg value="-output=${bin}/${project.name}-${project.version}.swc" />
+            <arg value="-output=${out.name}" />
             <arg value="-include-sources=${src}" />
             <arg value="-library-path+=${libs}" />
             <arg value="-load-config+=${build-config}" />
         </java>
+        <zip destfile="${out.name}" update="true">
+            <zipfileset dir="${asdoc}" prefix="docs">
+                <include name="*.*"/>
+                <exclude name="ASDoc_Config.xml"/>
+                <exclude name="overviews.xml"/>
+            </zipfileset>
+        </zip>
     </target>
 
     <target name="publish" depends="compile">
