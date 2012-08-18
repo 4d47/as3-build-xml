@@ -8,18 +8,18 @@
     <!-- default properties and locations -->
     <available file="build-config.xml" property="build-config" value="${basedir}/build-config.xml" />
     <available file="src" property="src" value="${basedir}/src" />
-    <available file="libs" property="libs" value="${basedir}/libs" />
+    <available file="lib" property="lib" value="${basedir}/lib" />
 
     <property name="debug" value="false" />
     <property name="src" location="${basedir}" />
     <property name="asdoc" location="asdoc" />
     <property name="bin" location="bin" />
-    <property name="libs" location="${basedir}" />
+    <property name="lib" location="${basedir}" />
     <property name="test" location="test" />
     <property name="test.headless" value="false" />
     <property name="build.lib" location="${build}/lib" />
     <property name="build-config" location="${build}/build-config.xml" />
-    <property name="test-reports" location="test-reports" />
+    <property name="test-report" location="test-report" />
     <property name="mxmlc.maxmemory" value="512m" />
     <property name="serve.port" value="8080" />
     <property name="serve.root" value="${bin}" />
@@ -51,7 +51,7 @@
 
     <target name="clean">
         <delete dir="${asdoc}" />
-        <delete dir="${test-reports}"/>
+        <delete dir="${test-report}"/>
         <delete>
             <fileset dir="${bin}" includes="*.swf" erroronmissingdir="false" />
             <fileset dir="${bin}" includes="*.swc" erroronmissingdir="false" />
@@ -62,32 +62,32 @@
     </target>
 
     <target name="test">
-        <delete dir="${test-reports}" />
-        <mkdir dir="${test-reports}" />
-        <flexunit debug="true" headless="${test.headless}" toDir="${test-reports}" verbose="true">
+        <delete dir="${test-report}" />
+        <mkdir dir="${test-report}" />
+        <flexunit debug="true" headless="${test.headless}" toDir="${test-report}" verbose="true">
             <source dir="${src}" />
             <testSource dir="${test}">
                 <include name="**/*Test.as" />
                 <include name="**/*Test.mxml" />
             </testSource>
             <library dir="${build.lib}" />
-            <library dir="${libs}" />
+            <library dir="${lib}" />
         </flexunit>
         <delete file="TestRunner.mxml" />
         <delete file="TestRunner.swf" />
-        <junitreport todir="${test-reports}">
-            <fileset dir="${test-reports}">
+        <junitreport todir="${test-report}">
+            <fileset dir="${test-report}">
                 <include name="TEST-*.xml" />
             </fileset>
-            <report format="frames" todir="${test-reports}/html" />
+            <report format="frames" todir="${test-report}/html" />
         </junitreport>
-        <fail message="Test Failed: see '${test-reports}/html/index.html' for details." if="flexunit.failed" />
+        <fail message="Test Failed: see '${test-report}/html/index.html' for details." if="flexunit.failed" />
     </target>
 
     <target name="audit">
-        <flexpmd sourceDirectory="${src}" outputDirectory="${test-reports}" />
-        <metrics sourcedirectory="${src}" outputfile="${test-reports}/javancss.xml" />
-        <cpd minimumTokenCount="50" outputFile="${test-reports}/cpd.xml">
+        <flexpmd sourceDirectory="${src}" outputDirectory="${test-report}" />
+        <metrics sourcedirectory="${src}" outputfile="${test-report}/javancss.xml" />
+        <cpd minimumTokenCount="50" outputFile="${test-report}/cpd.xml">
             <fileset dir="${src}">
                 <include name="**/*.as"/>
                 <include name="**/*.mxml"/>
@@ -98,7 +98,7 @@
     <target name="asdoc">
         <asdoc failonerror="true" output="${asdoc}" keep-xml="true" skip-xsl="true">
             <doc-sources path-element="${src}" />
-            <compiler.library-path dir="${libs}" append="true">
+            <compiler.library-path dir="${lib}" append="true">
                 <include name="**/*.swc" />
             </compiler.library-path>
             <load-config filename="${build-config}" append="true" />
@@ -120,7 +120,7 @@
         <propertyregex property="out.name" input="${name}" regexp="^(.*)\..*$" replace="\1.swf" />
         <mxmlc file="${file}" output="${bin}/${out.name}" debug="${debug}" fork="true" maxmemory="${mxmlc.maxmemory}">
             <source-path path-element="${src}" />
-            <compiler.library-path dir="${libs}" append="true">
+            <compiler.library-path dir="${lib}" append="true">
                 <include name="**/*.swc" />
             </compiler.library-path>
             <load-config filename="${build-config}" append="true" />
@@ -132,7 +132,7 @@
         <java jar="${FLEX_HOME}/lib/compc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
             <arg value="-output=${out.name}" />
             <arg value="-include-sources=${src}" />
-            <arg value="-library-path+=${libs}" />
+            <arg value="-library-path+=${lib}" />
             <arg value="-load-config+=${build-config}" />
         </java>
         <zip destfile="${out.name}" update="true">

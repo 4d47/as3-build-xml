@@ -4,7 +4,7 @@ as3-build-xml
 
 Generic Flex Ant build script.
 
-It compiles `src/*.{as,mxml}` using the SWCs in `libs/` and put the
+It compiles `src/*.{as,mxml}` using the SWCs in `lib/` and put the
 generated SWF files in the `bin/` folder. If no src files are found
 at the top-level, it assumes it is an archive and compiles a SWC.
 
