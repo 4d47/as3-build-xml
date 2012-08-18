@@ -16,6 +16,7 @@
     <property name="bin" location="bin" />
     <property name="libs" location="${basedir}" />
     <property name="test" location="test" />
+    <property name="test.headless" value="false" />
     <property name="build.lib" location="${build}/lib" />
     <property name="build-config" location="${build}/build-config.xml" />
     <property name="test-reports" location="test-reports" />
@@ -29,11 +30,6 @@
     <!-- test FLEX_HOME property to fail with a nicer error message -->
     <available file="${FLEX_HOME}" property="FLEX_HOME.available" />
     <fail message="Please define the FLEX_HOME environement variable or build property." unless="${FLEX_HOME.available}" />
-
-    <!-- defaults to running flexunit headless on Linux -->
-    <condition property="test.headless">
-        <and> <os family="unix" /> <not> <os family="mac" /> </not> </and>
-    </condition>
 
     <!-- list of main ActionScript files -->
     <path id="main.path">
@@ -68,7 +64,7 @@
     <target name="test">
         <delete dir="${test-reports}" />
         <mkdir dir="${test-reports}" />
-        <flexunit debug="true" headless="${test.headless}" toDir="${test-reports}" verbose="true" failureproperty="test.failed">
+        <flexunit debug="true" headless="${test.headless}" toDir="${test-reports}" verbose="true">
             <source dir="${src}" />
             <testSource dir="${test}">
                 <include name="**/*Test.as" />
@@ -85,7 +81,7 @@
             </fileset>
             <report format="frames" todir="${test-reports}/html" />
         </junitreport>
-        <fail message="Test Failed: see '${test-reports}/html/index.html' for details." if="test.failed" />
+        <fail message="Test Failed: see '${test-reports}/html/index.html' for details." if="flexunit.failed" />
     </target>
 
     <target name="audit">
