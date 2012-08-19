@@ -127,7 +127,8 @@
         </mxmlc>
     </target>
 
-    <target name="compile-swc" depends="asdoc" unless="main.available">
+    <target name="compile-swc" unless="main.available">
+        <antcall target="asdoc" />
         <property name="out.name" value="${bin}/${project.name}-${project.version}.swc" />
         <java jar="${FLEX_HOME}/lib/compc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
             <arg value="-output=${out.name}" />
