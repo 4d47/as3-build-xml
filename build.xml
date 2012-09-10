@@ -62,26 +62,35 @@
     </target>
 
     <target name="test">
-        <delete dir="${test-report}" />
-        <mkdir dir="${test-report}" />
-        <flexunit debug="true" headless="${test.headless}" toDir="${test-report}" verbose="true">
-            <source dir="${src}" />
-            <testSource dir="${test}">
-                <include name="**/*Test.as" />
-                <include name="**/*Test.mxml" />
-            </testSource>
-            <library dir="${build.lib}" />
-            <library dir="${lib}" />
-        </flexunit>
-        <delete file="TestRunner.mxml" />
-        <delete file="TestRunner.swf" />
-        <junitreport todir="${test-report}">
-            <fileset dir="${test-report}">
-                <include name="TEST-*.xml" />
-            </fileset>
-            <report format="frames" todir="${test-report}/html" />
-        </junitreport>
-        <fail message="Test Failed: see '${test-report}/html/index.html' for details." if="flexunit.failed" />
+        <trycatch property="flexunit.failed">
+            <try>
+                <delete dir="${test-report}" />
+                <mkdir dir="${test-report}" />
+                <flexunit debug="true" headless="${test.headless}" toDir="${test-report}" verbose="true">
+                    <source dir="${src}" />
+                    <testSource dir="${test}">
+                        <include name="**/*Test.as" />
+                        <include name="**/*Test.mxml" />
+                    </testSource>
+                    <library dir="${build.lib}" />
+                    <library dir="${lib}" />
+                </flexunit>
+                <junitreport todir="${test-report}">
+                    <fileset dir="${test-report}">
+                        <include name="TEST-*.xml" />
+                    </fileset>
+                    <report format="frames" todir="${test-report}/html" />
+                </junitreport>
+                <fail message="Test Failed: see '${test-report}/html/index.html' for details." if="flexunit.failed" />
+            </try>
+            <catch>
+                <fail message="${flexunit.failed}" if="flexunit.failed" />
+            </catch>
+            <finally>
+                <delete file="TestRunner.mxml" />
+                <delete file="TestRunner.swf" />
+            </finally>
+        </trycatch>
     </target>
 
     <target name="audit">
