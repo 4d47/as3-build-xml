@@ -105,7 +105,7 @@
     </target>
 
     <target name="asdoc">
-        <asdoc failonerror="true" output="${asdoc}" keep-xml="true" skip-xsl="true">
+        <asdoc failonerror="true" output="${asdoc}" keep-xml="true">
             <doc-sources path-element="${src}" />
             <compiler.library-path dir="${lib}" append="true">
                 <include name="**/*.swc" />
